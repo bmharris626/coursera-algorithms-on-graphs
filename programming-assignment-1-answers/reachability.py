@@ -2,8 +2,15 @@
 
 import sys
 
+def explore(v, visited, E):
+    visited[v] = True
+    for w in E[v]:
+        if not visited[w]: explore(w, visited, E)
+
 def reach(adj, x, y):
-    #write your code here
+    visited = [None for i in range(len(adj))]
+    explore(x, visited, adj)
+    if visited[y]: return 1
     return 0
 
 if __name__ == '__main__':

@@ -2,11 +2,21 @@
 
 import sys
 
+def explore(v, visited, ccNum, E):
+    visited[v] = True
+    ccNum[v] = 1
+    for w in E[v]:
+        if not visited[w]: explore(w, visited, ccNum, E)
 
 def number_of_components(adj):
-    result = 0
-    #write your code here
-    return result
+    cc = 0
+    visited = [False for i in range(len(adj))]
+    ccNum = [0 for i in range(len(adj))]
+    for v in range(len(adj)):
+        if not visited[v]:
+            explore(v, visited, ccNum, adj)
+            cc += 1
+    return cc
 
 if __name__ == '__main__':
     input = sys.stdin.read()
