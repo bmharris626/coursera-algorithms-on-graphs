@@ -2,16 +2,48 @@
 
 import sys
 
-def dfs(adj, used, order, x):
-    #write your code here
-    pass
+class directedGraph:
 
+    def __init__(self, G):
+        self.G = G
+
+    def explore(self, v):
+        self.visited[v] = True
+        self.preVisit(v)
+        for u in self.G[v]:
+            if not self.visited[u]:
+                self.predecessor[u] = v
+                self.explore(u)
+            if self.post[u] == None: self.cycles += 1
+        self.postVisit(v)
+
+    def dfs(self):
+        self.visited, self.pre = list(), list()
+        self.post, self.predecessor = list(), list()
+        self.topsort = list()
+        self.cycles = 0
+        for i in range(len(self.G)):
+            self.visited.append(False)
+            self.pre.append(None)
+            self.post.append(None)
+            self.predecessor.append(None)
+        self.clock = 0
+        for i in range(len(self.G)):
+            if not self.visited[i]: self.explore(i)
+
+    def preVisit(self, v):
+        self.pre[v] = self.clock
+        self.clock += 1
+
+    def postVisit(self, v):
+        self.post[v] = self.clock
+        self.topsort.append(v)
+        self.clock += 1
 
 def toposort(adj):
-    used = [0] * len(adj)
-    order = []
-    #write your code here
-    return order
+    graph = directedGraph(adj)
+    graph.dfs()
+    return reversed(graph.topsort)
 
 if __name__ == '__main__':
     input = sys.stdin.read()

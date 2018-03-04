@@ -10,15 +10,23 @@ class directedGraph:
     def explore(self, v):
         self.visited[v] = True
         self.preVisit(v)
-        for w in self.G[v]:
-            if not self.visited[v]: self.explore(v)
+        for u in self.G[v]:
+            if not self.visited[u]:
+                self.predecessor[u] = v
+                self.explore(u)
+            if self.post[u] == None: self.cycles += 1
         self.postVisit(v)
 
     def dfs(self):
-        self.visited = [False for i in range(len(self.G))]
+        self.visited, self.pre = list(), list()
+        self.post, self.predecessor = list(), list()
+        self.cycles = 0
+        for i in range(len(self.G)):
+            self.visited.append(False)
+            self.pre.append(None)
+            self.post.append(None)
+            self.predecessor.append(None)
         self.clock = 0
-        self.pre = self.visited.copy()
-        self.post = self.visited.copy()
         for i in range(len(self.G)):
             if not self.visited[i]: self.explore(i)
 
@@ -30,15 +38,10 @@ class directedGraph:
         self.post[v] = self.clock
         self.clock += 1
 
-    def topologicalSort(self):
-        self.dfs()
-        A = list(zip(range(len(self.G)), self.pre, self.post))
-        return sorted(A, key=lambda x: x[2], reverse=True)
-
 def acyclic(adj):
     graph = directedGraph(adj)
-    G = graph.topologicalSort()
-    print(G)
+    graph.dfs()
+    if graph.cycles > 0: return 1
     return 0
 
 if __name__ == '__main__':
