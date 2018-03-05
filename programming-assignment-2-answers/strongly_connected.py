@@ -8,62 +8,55 @@ class directedGraph:
 
     def __init__(self, G):
         self.G = G
+        self.n = len(G)
 
     def transpose(self):
-        G_t = [list() for i in range(len(self.G))]
-        for v in range(len(self.G)):
+        G_t = [list() for i in range(self.n)]
+        for v in range(self.n):
             for u in self.G[v]:
                 G_t[u].append(v)
         return G_t
 
-    def explore(self, v):
-        self.visited[v] = True
-        self.preVisit(v)
+    def explore(self, v, visited):
+        self.clock += 1
+        self.pre[v] = self.clock
+        visited[v] = True
         for u in self.G[v]:
-            if not self.visited[u]:
+            if not visited[u]:
                 self.predecessor[u] = v
-                self.explore(u)
-            if self.post[u] == None: self.cycles += 1
-        self.postVisit(v)
+                self.explore(u, visited)
+        self.clock += 1
+        self.post[v] = self.clock
+        self.topsort.insert(0, v)
 
     def dfs(self):
-        self.visited, self.pre = list(), list()
-        self.post, self.predecessor = list(), list()
+        visited, self.predecessor = list(), list()
         self.topsort = list()
-        self.cycles = 0
-        for i in range(len(self.G)):
-            self.visited.append(False)
-            self.pre.append(None)
-            self.post.append(None)
+        for v in range(self.n):
+            visited.append(False)
             self.predecessor.append(None)
+        self.pre = self.predecessor.copy()
+        self.post = self.predecessor.copy()
         self.clock = 0
-        print(self.G)
-        for i in range(len(self.G)):
-            print(i, self.visited)
-            if not self.visited[i]: 
-                self.explore(i)
-            
-
-    def preVisit(self, v):
-        self.pre[v] = self.clock
-        self.clock += 1
-
-    def postVisit(self, v):
-        self.post[v] = self.clock
-        self.topsort.append(v)
-        self.clock += 1
+        for v in range(self.n):
+            if not visited[v]: self.explore(v, visited)
 
 def number_of_strongly_connected_components(adj):
-    print(adj)
     graph = directedGraph(adj)
+    graph.dfs()
     adj_t = graph.transpose()
     graph_t = directedGraph(adj_t)
-    graph_t.dfs()
-    scc = 0
-    graph_t.visited = [False for i in range(len(adj_t))]
-    for v in reversed(graph_t.topsort):
-        if not graph_t.visited[v]:
-            graph_t.explore(v)
+    visited, graph_t.predecessor = list(), list()
+    graph_t.topsort = list()
+    for v in range(graph_t.n):
+        visited.append(False)
+        graph_t.predecessor.append(None)
+    graph_t.pre = graph_t.predecessor.copy()
+    graph_t.post = graph_t.predecessor.copy()
+    graph_t.clock, scc = 0, 0
+    for v in graph.topsort:
+        if not visited[v]: 
+            graph_t.explore(v, visited)
             scc += 1
     return scc
 
