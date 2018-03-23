@@ -1,42 +1,62 @@
 #Uses python3
+
 import sys
 import heapq
+from random import randint
+
+class priorityQueue:
+
+    def __init__(self):
+        self.pq = list()
+        self.finder = dict()
+
+    def add(self, task, priority=0):
+        if task in self.finder:
+            self.remove(task)
+        entry = [priority, task]
+        self.finder[task] = entry
+        heapq.heappush(self.pq, entry)
+
+    def remove(self, task):
+        entry = self.finder.pop(task)
+        entry[0], entry[1] = float('inf'), None
+
+    def pop(self):
+        priority, task = heapq.heappop(self.pq)
+        if task != None:
+            del self.finder[task]
+            return task
+
+    def find(self, task):
+        return self.finder.get(task, None)
+
+    def empty(self):
+        return len(self.finder) == 0
 
 def distance(p1, p2):
     return ((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)**(1/2)
 
-def find(sets, p):
-    for i in range(len(sets)):
-        if p in sets[i]: return i
-
-def build_heap(x, y):
-    n = len(x)
-    h = list()
-    for i in range(n):
-        p1 = (x[i], y[i])
-        for j in range(n-i-1):
-            p2 = (x[i+j], y[i+j])
-            d = distance(p1, p2)
-            heapq.heappush(h, (d, p1, p2))
-    return h
-
 def minimum_distance(x, y):
-    result = 0.
-    sets = [{(x[i], y[i])} for i in range(n)]
-    h = build_heap(x, y)
-    for i in range(len(h)):
-        d, u, v = heapq.heappop(h)
-        uSet, vSet = find(sets, u), find(sets, v)
-        if uSet != vSet:
-            u, v = sets.pop(uSet), sets.pop(vSet)
-            s = u | v
-            sets.append(s)
-            result += d
-    return result
-
-"""
-TRY IMPLEMENTING NOT KRUSKAL
-""" 
+    n = len(x)
+    cost, parent = list(), list()
+    u = randint(0, n-1)
+    PQ = priorityQueue()
+    for i in range(n):
+        c = float('inf')
+        if i == u: c = 0
+        cost.append(c)
+        parent.append(None)
+        PQ.add(i, cost[i])
+    while not PQ.empty():
+        v = PQ.pop()
+        p1 = (x[v], y[v])
+        for z in range(n):
+            p2 = (x[z], y[z])
+            w = distance(p1, p2)
+            if (PQ.find(z)!=None) and (cost[z]>w):
+                cost[z], parent[z] = w, v
+                PQ.add(z, w)
+    return float(sum(cost))
 
 if __name__ == '__main__':
     input = sys.stdin.read()
@@ -45,11 +65,3 @@ if __name__ == '__main__':
     x = data[1::2]
     y = data[2::2]
     print("{0:.9f}".format(minimum_distance(x, y)))
-
-"""
-4
-0 0
-0 1
-1 0
-1 1
-"""
