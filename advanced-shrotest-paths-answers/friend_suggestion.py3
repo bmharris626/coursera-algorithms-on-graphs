@@ -106,17 +106,12 @@ class BiDij:
                 u_best = u
                 distance = self.d[0][u] + self.d[1][u]
             if self.d[0][u] + pq[1].top() > distance: break 
-        while not pq[0].empty():
-            u = pq[0].pop()
+        while not pq[1].empty():
+            u = pq[1].pop()
             if self.d[0][u] + self.d[1][u] < distance:
                 u_best = u
                 distance = self.d[0][u] + self.d[1][u]
             if self.d[1][u] + pq[0].top() > distance: break 
-        for key in pq[1].entry_finder:
-            d, c, u = pq[1].entry_finder[key]
-            if self.d[0][u] + self.d[1][u] < distance:
-                u_best = u
-                distance = self.d[0][u] + self.d[1][u]
         path, last = [], u_best
         while last != s:
             path.append(last)
