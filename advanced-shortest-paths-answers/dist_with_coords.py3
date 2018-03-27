@@ -88,6 +88,7 @@ class AStar:
             proc[0].append(v)
             self.workset.append(v)
             if v in proc[1]: return self.shortest_path(s, t, proc)
+
             v = pq[1].pop()
             self.process(pq, 1, v, s)
             proc[1].append(v)
@@ -96,10 +97,9 @@ class AStar:
         return -1
 
     def shortest_path(self, s, t, proc):
-        distance, u_best = self.inf, None
+        distance = self.inf
         for v in proc[0] + proc[1]:
             if self.gScore[0][v] + self.gScore[1][v] < distance:
-                u_best = v
                 distance = self.gScore[0][v] + self.gScore[1][v]
         return distance
 
@@ -117,7 +117,7 @@ if __name__ == '__main__':
         x[i] = a
         y[i] = b
     for e in range(m):
-        u,v,c = readl()
+        u, v, c = readl()
         adj[0][u-1].append(v-1)
         cost[0][u-1].append(c)
         adj[1][v-1].append(u-1)
