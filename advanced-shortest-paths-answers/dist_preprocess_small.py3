@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 
-import sys
 import heapq
 import itertools
+
+maxlen = 2 * 10**6
 
 class PriorityQueue:
 
@@ -64,12 +65,13 @@ class DistPreprocessSmall:
 
         for v in range(n):
             importance, shortcuts, level = self.shortcut(v)
-            self.q.add(-importance, v)
-        # Dijkstra search
-        while not self.q.empty():
-            v = q.pop()
-            importance, shortcuts, level = self.shortcut(v)
-        pass
+            self.q.add(v, -importance)
+            print(v, shortcuts)
+#         # Dijkstra search
+#         while not self.q.empty():
+#             v = q.pop()
+#             importance, shortcuts, level = self.shortcut(v)
+#         pass
 
     def mark_visited(self, x):
         if not self.visited[x]:
@@ -88,17 +90,47 @@ class DistPreprocessSmall:
         update(self.G[0], self.W[0], u, v, c)
         update(self.G[1], self.W[1], v, u, c)
 
+    def dijkstra(self, s, c=-1):
+        dist, H = list(), list()
+        dist = [self.INFINITY]*self.n
+        if len(self.G[0][c]) == 0: return dist
+        start = self.G[0][c][s]
+        if c > -1:
+            for i in range(len(self.G[0][c])): # all outgoing edges from c
+                u = self.G[0][c][i]
+                dist[u] = self.W[1][c][s] + self.W[0][c][i]
+        heapq.heappush(H, (0, start))
+        dist[s] = 0
+        while len(H) > 0:
+            u = heapq.heappop(H)[1]
+            for i in range(len(self.G[0][u])):
+                v = self.G[0][u][i]
+                if v == c: continue
+                tentative_dist = dist[u] + self.W[0][u][i]
+                if dist[v] > tentative_dist:
+                    dist[v] = tentative_dist
+                    heapq.heappush(H, (dist[v], v))
+        return dist
+
     # Makes shortcuts for contracting node v
     def shortcut(self, v):
         # Implement this method yourself
-
+        shortcuts = []
+        for i in range(len(self.G[1][v])): # u = index of incoming edge to v
+            w = self.G[1][v][i]
+            dist = self.dijkstra(i, v)
+            for j in range(len(self.G[0][v])): # w = index of outgoing edge from v
+                u = self.G[0][v][j]
+                distance = self.W[0][v][j] + self.W[1][v][i]
+                if dist[u] < distance:
+                    shortcuts.append((u, w, dist[u]))
         # Compute the node importance in the end
-        shortcut_count = 0
+        shortcut_count = len(shortcuts)
         neighbors = 0
         shortcut_cover = 0
         level = 0
         # Compute correctly the values for the above heuristics before computing the node importance
-        importance = (shortcut_count - len(self.adj[0][v]) - len(self.adj[1][v])) + neighbors + shortcut_cover + level
+        importance = (shortcut_count - len(self.G[0][v]) - len(self.G[1][v])) + neighbors + shortcut_cover + level
         return importance, shortcuts, level
 
     # See description of this method in the starter for friend_suggestion
@@ -122,7 +154,6 @@ class DistPreprocessSmall:
         # Implement the rest of the algorithm yourself
 
         return -1 if estimate == self.INFINITY else estimate
-
 
 def readl():
         return map(int, sys.stdin.readline().split())
